@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang = "en">
+<head>
+    <meta charset = "UTF-8">
+    <meta name = "viewport" content = "width=device-width, initial-scale=1.0">
+    <link rel = "stylesheet" href = "design.css">
+    <title>Sklad Mini App</title>
+</head>
+<body>
+    <div id = "main-screen">
+        <h1 class = "main-text">Sklad Mini App</h1>
+        <button class = "add-btn buttons-on-main-screen" onclick = "ShowScreen('add-screen', 'main-screen')">Додати артикул</button>
+        <button class = "remove-btn buttons-on-main-screen" onclick = "ShowScreen('remove-screen', 'main-screen')">Видалити артикул</button>
+        <button class = "find-btn buttons-on-main-screen" onclick = "ShowScreen('find-screen', 'main-screen')">Знайти артикул</button>
+        <button class = "change-btn buttons-on-main-screen" onclick = "ShowScreen('change-screen', 'main-screen')">Змінити розташування артикула</button>
+    </div>
+
+    <div id = "action-screen" class = "hiden">
+        <button class = "back-btn" onclick = "ShowScreen('main-screen', 'action-screen')">Назад</button>
+        <h1 id = "text-to-change" class = "action-text"></h1>
+        <input placeholder = "Введіть артикул" class = "input-article" id = "input-article">
+        <input placeholder = "Введіть розташування" class = "input-custom hiden" id = "input-custom">
+        <div class = "buttons">
+            <button id = "main-action-btn" class = "main-action-btn" onclick = "MainAction()"></button>
+            <button class = "clear-input" onclick = "ClearInput()">Очистити</button>
+        </div>
+        <h1 id = "text-answer" class = "text-answer hiden"></h1>
+    </div>
+    <script src = "app.js"></script>
+</body>
+</html>

@@ -1,0 +1,163 @@
+/* Головне меню */
+.main-text 
+{
+    text-align: center;
+    color: #ffffff;
+    font-family: Arial;
+    font-size: 48px;
+    margin-top: 75px;
+    margin-bottom: 100px;
+}
+
+.buttons-on-main-screen
+{
+    display: block;
+    margin-top: 20px;
+    margin-left: auto;
+    margin-right: auto;
+    color: #ffffff;
+    width: 350px;
+    height: 90px;
+}
+
+.add-btn
+{
+    background-color: #17a815
+}
+.remove-btn
+{
+    background-color: #e80e0e
+}
+.change-btn
+{
+    background-color: #b9cb13
+}
+.find-btn
+{
+    background-color: #0843e6
+}
+
+
+
+
+
+
+/* Кастомна сторінка */
+.back-btn
+{
+    display: block;
+    margin-top: 20px;
+    margin-left: 6px;
+    background-color: #ffff00;
+    color: #000000;
+    width: 120px;
+    height: 60px;
+    border-width: 4px;
+    border-color: #b9cb13
+}
+
+.action-text
+{
+    text-align: center;
+    color: #ffffff;
+    font-family: Arial;
+    font-size: 35px;
+    margin-top: 30px;
+    margin-bottom: 75px;
+}
+
+.text-answer
+{
+    text-align: center;
+    color: #ffffff;
+    font-family: Arial;
+    font-size: 35px;
+    margin-top: 30px;
+    margin-bottom: 75px;
+}
+
+.input-article
+{
+    display: block;
+    padding-left: 25px;
+    margin-left: auto;
+    margin-right: auto;
+    border-radius: 25px;
+    height: 60px;
+    width: 350px;
+    font-family: Arial;
+    font-size: 15px
+}
+
+.input-custom
+{
+    display: block;
+    padding-left: 25px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 10px;
+    border-radius: 25px;
+    height: 60px;
+    width: 350px;
+    font-family: Arial;
+    font-size: 15px
+}
+
+
+.buttons
+{
+    display: block;
+    margin-top: 20px;
+    margin-left: auto;
+    margin-right: auto;
+    width: fit-content;
+}
+
+.main-action-btn
+{
+    margin-right: 15px;
+    width: 170px;
+    height: 70px;
+    border-color: #007b1b;
+    border-width: 4px;
+    background-color: #17a815;
+    color: #ffffff;
+}
+
+.clear-input
+{
+    margin-left: 15px;
+    width: 170px;
+    height: 70px;
+    border-color: #0014cd;
+    border-width: 4px;
+    background-color: #0062ff;
+    color: #ffffff;
+}
+
+
+/* Загальний стиль */
+body
+{
+    background-color: #030b1f;
+}
+
+button
+{
+    border-radius: 100px;
+    font-family: Arial;
+    font-size: 20px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+
+button:active
+{
+    transform: scale(0.8); 
+    filter: brightness(3);
+}
+
+.hiden
+{
+    display: none;
+}
