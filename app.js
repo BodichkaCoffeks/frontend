@@ -74,7 +74,7 @@ async function MainAction()
             });
             var result = await response.json();
             document.getElementById('text-answer').classList.remove('hiden');
-            document.getElementById('text-answer').innerText = result.message;
+            document.getElementById('text-answer').innerHTML = result.message;
             ClearInput();
         }
     }
@@ -94,7 +94,7 @@ async function MainAction()
             });
             var result = await response.json();
             document.getElementById('text-answer').classList.remove('hiden');
-            document.getElementById('text-answer').innerText = result.message;
+            document.getElementById('text-answer').innerHTML = result.message;
             ClearInput();
         }
     }
@@ -114,7 +114,7 @@ async function MainAction()
             });
             var result = await response.json();
             document.getElementById('text-answer').classList.remove('hiden'); 
-            document.getElementById('text-answer').innerText = result.message;
+            document.getElementById('text-answer').innerHTML = result.message;
             ClearInput();
         }
     }
@@ -135,7 +135,7 @@ async function MainAction()
             });
             var result = await response.json();
             document.getElementById('text-answer').classList.remove('hiden');
-            document.getElementById('text-answer').innerText = result.message;
+            document.getElementById('text-answer').innerHTML = result.message;
             ClearInput();
         }
     }
