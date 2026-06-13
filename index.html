@@ -7,25 +7,68 @@
     <title>Sklad Mini App</title>
 </head>
 <body>
+
+
+
+
+
     <div id = "main-screen">
         <h1 class = "main-text">Sklad Mini App</h1>
-        <button class = "find-btn buttons-on-main-screen" onclick = "ShowScreen('find-screen', 'main-screen')">Знайти артикул</button>
-        <button class = "change-btn buttons-on-main-screen" onclick = "ShowScreen('change-screen', 'main-screen')">Змінити розташування артикула</button>
-        <button class = "add-btn buttons-on-main-screen" onclick = "ShowScreen('add-screen', 'main-screen')">Додати артикул</button>
-        <button class = "remove-btn buttons-on-main-screen" onclick = "ShowScreen('remove-screen', 'main-screen')">Видалити артикул</button>
+        <button class = "find-btn buttons-on-main-screen" onclick = "ShowScreen('find-screen')">Знайти артикул</button>
+        <button class = "change-btn buttons-on-main-screen" onclick = "ShowScreen('change-screen')">Змінити розташування артикула</button>
+        <button class = "add-btn buttons-on-main-screen" onclick = "ShowScreen('add-screen')">Додати артикул</button>
+        <button class = "remove-btn buttons-on-main-screen" onclick = "ShowScreen('remove-screen')">Видалити артикул</button>
     </div>
 
+
+
+
+
     <div id = "action-screen" class = "hiden">
-        <button class = "back-btn" onclick = "ShowScreen('main-screen', 'action-screen')">Назад</button>
+        <button class = "back-btn" onclick = "ShowScreen('main-screen')">Назад</button>
         <h1 id = "text-to-change" class = "action-text"></h1>
         <input placeholder = "Введіть артикул" class = "input-article" id = "input-article">
-        <input placeholder = "Введіть розташування" class = "input-custom hiden" id = "input-custom">
+        
+        <select class = "selection hiden" id = "main-selection">
+            <option value = "none">Виберіть основне розташування</option>
+            <option value = "Ящик праворуч">Ящик праворуч</option>
+            <option value = "Ящик ліворуч">Ящик ліворуч</option>
+            <option value = "Ящик позаду">Ящик позаду</option>
+            <option value = "Стелаж праворуч">Стелаж праворуч</option>
+            <option value = "Стелаж ліворуч">Стелаж ліворуч</option>
+            <option value = "На даху">На даху</option>
+        </select>
+        
+        <select class = "selection hiden" id = "box-selection">
+            <option value = "Початок складу">Початок складу</option>
+            <option value = "Середина складу">Середина складу</option>
+            <option value = "Кінець складу">Кінець складу</option>
+        </select>
+
+        <select class = "selection hiden" id = "rack-selection">
+            <option value = "1 секція">1 секція</option>
+            <option value = "2 секція">2 секція</option>
+            <option value = "3 секція" id = "specifical-rack" class = "hiden">3 секція</option>
+        </select>
+
+        <select class = "selection hiden" id = "floor-selection">
+            <option value = "1 ярус">1 ярус</option>
+            <option value = "2 ярус">2 ярус</option>
+            <option value = "3 ярус">3 ярус</option>
+            <option value = "4 ярус">4 ярус</option>
+        </select>
+
         <div class = "buttons">
             <button id = "main-action-btn" class = "main-action-btn" onclick = "MainAction()"></button>
             <button class = "clear-input" onclick = "ClearInput()">Очистити</button>
         </div>
         <h1 id = "text-answer" class = "text-answer hiden"></h1>
     </div>
+
+
+
+
+
     <script src = "app.js"></script>
 </body>
 </html>
