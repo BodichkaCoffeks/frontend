@@ -1,76 +1,99 @@
 <!DOCTYPE html>
-<html lang = "en">
+<html lang="uk">
 <head>
-    <meta charset = "UTF-8">
-    <meta name = "viewport" content = "width=device-width, initial-scale=1.0">
-    <link rel = "stylesheet" href = "design.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <link rel="stylesheet" href="design.css">
     <title>Sklad Mini App</title>
 </head>
 <body>
 
-
-
-
-
-    <div id = "main-screen">
-        <h1 class = "main-text">Sklad Mini App</h1>
-        <button class = "find-btn buttons-on-main-screen" onclick = "ShowScreen('find-screen')">Знайти артикул</button>
-        <button class = "change-btn buttons-on-main-screen" onclick = "ShowScreen('change-screen')">Змінити розташування артикула</button>
-        <button class = "add-btn buttons-on-main-screen" onclick = "ShowScreen('add-screen')">Додати артикул</button>
-        <button class = "remove-btn buttons-on-main-screen" onclick = "ShowScreen('remove-screen')">Видалити артикул</button>
+    <div id="main-screen">
+        <h1 class="main-text">Sklad Mini App</h1>
+        <button class="find-btn buttons-on-main-screen" onclick="ShowScreen('find-screen')">Знайти артикул</button>
+        <button class="change-btn buttons-on-main-screen" onclick="ShowScreen('change-screen')">Змінити розташування артикула</button>
+        <button class="add-btn buttons-on-main-screen" onclick="ShowScreen('add-screen')">Додати артикул</button>
+        <button class="remove-btn buttons-on-main-screen" onclick="ShowScreen('remove-screen')">Видалити артикул</button>
     </div>
 
-
-
-
-
-    <div id = "action-screen" class = "hiden">
-        <button class = "back-btn" onclick = "ShowScreen('main-screen')">Назад</button>
-        <h1 id = "text-to-change" class = "action-text"></h1>
-        <input placeholder = "Введіть артикул" class = "input-article" id = "input-article">
+    <div id="action-screen" class="hiden">
+        <button class="back-btn" onclick="ShowScreen('main-screen')">Назад</button>
+        <h1 id="text-to-change" class="action-text"></h1>
+        <input placeholder="Введіть артикул" class="input-article" id="input-article">
         
-        <select class = "selection hiden" id = "main-selection">
-            <option value = "none">Виберіть основне розташування</option>
-            <option value = "Ящик праворуч">Право ящик</option>
-            <option value = "Ящик ліворуч">Ліво ящик</option>
-            <option value = "Ящик позаду">Ящик позаду</option>
-            <option value = "Стелаж праворуч">Право стелаж</option>
-            <option value = "Стелаж ліворуч">Ліво стелаж</option>
-            <option value = "На даху">На даху</option>
-            <option value = "Одинички">Одинички</option>
-        </select>
+        <button id="scan-btn" class="scan-camera-btn hiden" onclick="StartTextScanner()">Сканувати рахунок</button>
         
-        <select class = "selection hiden" id = "box-selection">
-            <option value = "Початок складу">Початок складу</option>
-            <option value = "Середина складу">Середина складу</option>
-            <option value = "Кінець складу">Кінець складу</option>
-        </select>
-
-        <select class = "selection hiden" id = "rack-selection">
-            <option value = "1 секція">1 секція</option>
-            <option value = "2 секція">2 секція</option>
-            <option value = "3 секція" id = "specifical-rack" class = "hiden">3 секція</option>
-        </select>
-
-        <select class = "selection hiden" id = "floor-selection">
-            <option value = "1 ярус">1 ярус</option>
-            <option value = "2 ярус">2 ярус</option>
-            <option value = "3 ярус">3 ярус</option>
-            <option value = "4 ярус">4 ярус</option>
-            <option value = "5 ярус">5 ярус</option>
-        </select>
-
-        <div class = "buttons">
-            <button id = "main-action-btn" class = "main-action-btn" onclick = "MainAction()"></button>
-            <button class = "clear-input" onclick = "ClearInput()">Очистити</button>
+        <div id="loader-container" class="loader-container hiden">
+            <div class="spinner"></div>
+            <p id="loader-status" class="loader-status-text">Обробка зображення...</p>
         </div>
-        <h1 id = "text-answer" class = "text-answer hiden"></h1>
+
+        <select class="selection hiden" id="main-selection">
+            <option value="none">Виберіть основне розташування</option>
+            <option value="Ящик праворуч">Право ящик</option>
+            <option value="Ящик ліворуч">Ліво ящик</option>
+            <option value="Ящик позаду">Ящик позаду</option>
+            <option value="Стелаж праворуч">Право стелаж</option>
+            <option value="Стелаж ліворуч">Ліво стелаж</option>
+            <option value="На даху">На даху</option>
+            <option value="Одинички">Одинички</option>
+        </select>
+        
+        <select class="selection hiden" id="box-selection">
+            <option value="Початок складу">Початок складу</option>
+            <option value="Середина складу">Середина складу</option>
+            <option value="Кінець складу">Кінець складу</option>
+        </select>
+
+        <select class="selection hiden" id="rack-selection">
+            <option value="1 секція">1 секція</option>
+            <option value="2 секція">2 секція</option>
+            <option value="3 секція" id="specifical-rack" class="hiden">3 секція</option>
+        </select>
+
+        <select class="selection hiden" id="floor-selection">
+            <option value="1 ярус">1 ярус</option>
+            <option value="2 ярус">2 ярус</option>
+            <option value="3 ярус">3 ярус</option>
+            <option value="4 ярус">4 ярус</option>
+            <option value="5 ярус">5 ярус</option>
+        </select>
+
+        <div class="buttons">
+            <button id="main-action-btn" class="main-action-btn" onclick="MainAction()"></button>
+            <button class="clear-input" onclick="ClearInput()">Очистити</button>
+        </div>
+        <h1 id="text-answer" class="text-answer hiden"></h1>
     </div>
 
+    <div id="camera-container" class="camera-container hiden">
+        <video id="camera-video" autoplay playsinline muted class="camera-video"></video>
+        <canvas id="camera-freeze" class="camera-freeze hiden"></canvas>
 
+        <div id="camera-processing" class="camera-processing hiden">
+            <div class="spinner"></div>
+            <p class="camera-processing-text">Рахунок зафіксовано.<br>Розпізнавання всіх артикулів...</p>
+            <button id="cancel-processing-btn" class="cancel-camera-btn" type="button" onclick="StopScanner()">Скасувати</button>
+        </div>
 
+        <div class="camera-overlay" aria-hidden="true">
+            <div class="scan-mask scan-mask-top"></div>
+            <div class="scan-mask scan-mask-bottom"></div>
+            <div class="scan-mask scan-mask-left"></div>
+            <div class="scan-mask scan-mask-right"></div>
+            <div id="scanner-frame" class="scanner-frame"></div>
+        </div>
 
+        <p id="camera-hint" class="camera-hint">Наведіть увесь рахунок у рамку</p>
+        <p id="camera-status" class="camera-status hiden"></p>
 
-    <script src = "app.js"></script>
+        <div class="camera-controls">
+            <button id="capture-btn" class="capture-btn" type="button" onclick="CaptureAndScanFrame()">Сфотографувати</button>
+            <button id="retry-scan-btn" class="retry-scan-btn hiden" type="button" onclick="RetryScanCapture()">Спробувати ще раз</button>
+            <button id="cancel-camera-btn" class="cancel-camera-btn" type="button" onclick="StopScanner()">Скасувати</button>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
 </body>
 </html>
