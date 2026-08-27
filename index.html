@@ -19,16 +19,20 @@
     <div id="action-screen" class="hiden">
         <button class="back-btn" onclick="ShowScreen('main-screen')">Назад</button>
         <h1 id="text-to-change" class="action-text"></h1>
-        <input placeholder="Введіть артикул" class="input-article" id="input-article">
-        
-        <button id="scan-btn" class="scan-camera-btn hiden" onclick="StartTextScanner()">Сканувати рахунок</button>
+        <input placeholder="Введіть артикул" class="form-field input-article" id="input-article">
+
+        <div id="scan-actions" class="scan-actions hiden">
+            <button id="scan-btn" class="form-field scan-camera-btn" type="button" onclick="StartTextScanner()">Сканувати камерою</button>
+            <button id="upload-btn" class="form-field upload-screenshot-btn" type="button" onclick="TriggerScreenshotPicker()">Завантажити скриншот</button>
+            <input id="screenshot-input" class="screenshot-input" type="file" accept="image/jpeg,image/png,image/webp,image/*">
+        </div>
         
         <div id="loader-container" class="loader-container hiden">
             <div class="spinner"></div>
             <p id="loader-status" class="loader-status-text">Обробка зображення...</p>
         </div>
 
-        <select class="selection hiden" id="main-selection">
+        <select class="form-field selection hiden" id="main-selection">
             <option value="none">Виберіть основне розташування</option>
             <option value="Ящик праворуч">Право ящик</option>
             <option value="Ящик ліворуч">Ліво ящик</option>
@@ -39,19 +43,22 @@
             <option value="Одинички">Одинички</option>
         </select>
         
-        <select class="selection hiden" id="box-selection">
+        <select class="form-field selection hiden" id="box-selection">
+            <option value="none">Виберіть розташування ящика</option>
             <option value="Початок складу">Початок складу</option>
             <option value="Середина складу">Середина складу</option>
             <option value="Кінець складу">Кінець складу</option>
         </select>
 
-        <select class="selection hiden" id="rack-selection">
+        <select class="form-field selection hiden" id="rack-selection">
+            <option value="none">Виберіть секцію</option>
             <option value="1 секція">1 секція</option>
             <option value="2 секція">2 секція</option>
-            <option value="3 секція" id="specifical-rack" class="hiden">3 секція</option>
+            <option value="3 секція" id="specifical-rack">3 секція</option>
         </select>
 
-        <select class="selection hiden" id="floor-selection">
+        <select class="form-field selection hiden" id="floor-selection">
+            <option value="none">Виберіть ярус</option>
             <option value="1 ярус">1 ярус</option>
             <option value="2 ярус">2 ярус</option>
             <option value="3 ярус">3 ярус</option>
@@ -89,6 +96,7 @@
 
         <div class="camera-controls">
             <button id="capture-btn" class="capture-btn" type="button" onclick="CaptureAndScanFrame()">Сфотографувати</button>
+            <button id="camera-upload-btn" class="camera-upload-btn" type="button" onclick="TriggerScreenshotPicker()">Завантажити скриншот</button>
             <button id="retry-scan-btn" class="retry-scan-btn hiden" type="button" onclick="RetryScanCapture()">Спробувати ще раз</button>
             <button id="cancel-camera-btn" class="cancel-camera-btn" type="button" onclick="StopScanner()">Скасувати</button>
         </div>
