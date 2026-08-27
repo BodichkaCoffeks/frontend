@@ -10,25 +10,19 @@ const GEMINI_REQUEST_TIMEOUT_MS = 65000;
 function ShowScreen(screen_to_show) {
     StopScanner();
     HideLoader();
-    
-    if (document.getElementById('scan-btn')) {
-        document.getElementById('scan-btn').classList.add('hiden');
-    }
+    HideScanActions();
+    ResetLocationFields();
+    ClearFieldError(document.getElementById('input-article'));
+    document.getElementById('input-article').placeholder = "Введіть назву артикула";
 
     if (screen_to_show === 'main-screen') {
-        document.getElementById('main-selection').value = "none";
-        document.getElementById('main-selection').style.border = "";
         document.getElementById('text-answer').innerHTML = "";
         document.getElementById('text-answer').classList.add('hiden');
         document.getElementById('input-article').value = "";
-        document.getElementById('input-article').style.border = "";
-        document.getElementById('input-article').placeholder = "Введіть назву артикула";
         document.getElementById('main-screen').classList.remove('hiden');
         document.getElementById('action-screen').classList.add('hiden');
         document.getElementById('main-selection').classList.add('hiden');
-        document.getElementById('box-selection').classList.add('hiden');
-        document.getElementById('rack-selection').classList.add('hiden');
-        document.getElementById('floor-selection').classList.add('hiden');
+        HideLocationSubmenus();
     } else {
         document.getElementById('main-screen').classList.add('hiden');
         document.getElementById('action-screen').classList.remove('hiden');
@@ -45,7 +39,7 @@ function ShowScreen(screen_to_show) {
             case 'find-screen':
                 document.getElementById('text-to-change').innerText = "Пошук артикула";
                 document.getElementById('main-action-btn').innerText = "Знайти";
-                document.getElementById('scan-btn').classList.remove('hiden');
+                ShowScanActions();
                 break;
             case 'change-screen':
                 document.getElementById('text-to-change').innerText = "Редагування артикула";
@@ -55,6 +49,71 @@ function ShowScreen(screen_to_show) {
             default:
                 break;
         }
+    }
+}
+
+function ShowScanActions() {
+    const scanActions = document.getElementById('scan-actions');
+    if (scanActions) {
+        scanActions.classList.remove('hiden');
+    }
+}
+
+function HideScanActions() {
+    const scanActions = document.getElementById('scan-actions');
+    if (scanActions) {
+        scanActions.classList.add('hiden');
+    }
+}
+
+function HideLocationSubmenus() {
+    document.getElementById('box-selection').classList.add('hiden');
+    document.getElementById('rack-selection').classList.add('hiden');
+    document.getElementById('floor-selection').classList.add('hiden');
+}
+
+function ResetLocationFields() {
+    const mainSelection = document.getElementById('main-selection');
+    const boxSelection = document.getElementById('box-selection');
+    const rackSelection = document.getElementById('rack-selection');
+    const floorSelection = document.getElementById('floor-selection');
+
+    mainSelection.value = "none";
+    boxSelection.value = "none";
+    rackSelection.value = "none";
+    floorSelection.value = "none";
+
+    ClearFieldError(mainSelection);
+    ClearFieldError(boxSelection);
+    ClearFieldError(rackSelection);
+    ClearFieldError(floorSelection);
+    HideLocationSubmenus();
+    SetRackSectionLimit(3);
+}
+
+function SetFieldError(element) {
+    if (!element) return;
+    element.classList.add('invalid');
+}
+
+function ClearFieldError(element) {
+    if (!element) return;
+    element.classList.remove('invalid');
+}
+
+function SetRackSectionLimit(maxSections) {
+    const rackSelection = document.getElementById('rack-selection');
+    const thirdSection = document.getElementById('specifical-rack');
+    const allowThird = maxSections >= 3;
+
+    if (thirdSection) {
+        thirdSection.hidden = !allowThird;
+        thirdSection.disabled = !allowThird;
+        thirdSection.classList.toggle('hiden', !allowThird);
+    }
+
+    if (!allowThird && rackSelection.value === "3 секція") {
+        rackSelection.value = "none";
     }
 }
 
@@ -83,15 +142,7 @@ async function MainAction() {
     
     if (action_type === "Додати" || action_type === "Редагувати") {
         if (IsArticleAndSelectionValid()) {
-            let locationStr = main_input;
-            if (main_input === 'Стелаж праворуч' || main_input === 'Стелаж ліворуч') {
-                var yarus_data = document.getElementById('rack-selection').value;
-                var floor_data = document.getElementById('floor-selection').value;
-                locationStr = main_input + " " + yarus_data + " " + floor_data;
-            } else if (main_input === 'Ящик праворуч' || main_input === 'Ящик ліворуч') { 
-                var box_data = document.getElementById('box-selection').value;
-                locationStr = main_input + " " + box_data;
-            }
+            const locationStr = BuildLocationString(main_input);
 
             try {
                 var response = await fetch(`${BACKEND_URL}${action}`, {
@@ -133,35 +184,96 @@ async function MainAction() {
     }
 }
 
-function IsArticleValid() {
-    if (document.getElementById('input-article').value.trim() === "") {
-        document.getElementById('input-article').style.border = "3px solid red";
-        document.getElementById('input-article').placeholder = "Це поле є обов'язковим!";
-        return false;
-    } else {
-        document.getElementById('input-article').style.border = "";
-        document.getElementById('input-article').placeholder = "Введіть назву артикула";
-        document.getElementById('main-selection').style.border = "";
-        return true;
+function BuildLocationString(mainInput) {
+    if (mainInput === "Стелаж праворуч" || mainInput === "Стелаж ліворуч") {
+        return `${mainInput} ${document.getElementById("rack-selection").value} ${document.getElementById("floor-selection").value}`;
     }
+    if (mainInput === "Ящик праворуч" || mainInput === "Ящик ліворуч") {
+        return `${mainInput} ${document.getElementById("box-selection").value}`;
+    }
+    return mainInput;
+}
+
+function IsLocationRuleValid(mainInput) {
+    if (mainInput === "none") {
+        return false;
+    }
+    if (mainInput === "Ящик праворуч" || mainInput === "Ящик ліворуч") {
+        const boxVal = document.getElementById("box-selection").value;
+        return ["Початок складу", "Середина складу", "Кінець складу"].includes(boxVal);
+    }
+    if (mainInput === "Стелаж праворуч") {
+        const section = document.getElementById("rack-selection").value;
+        const floor = document.getElementById("floor-selection").value;
+        return ["1 секція", "2 секція", "3 секція"].includes(section) && floor !== "none";
+    }
+    if (mainInput === "Стелаж ліворуч") {
+        const section = document.getElementById("rack-selection").value;
+        const floor = document.getElementById("floor-selection").value;
+        return ["1 секція", "2 секція"].includes(section) && floor !== "none";
+    }
+    return mainInput === "Ящик позаду" || mainInput === "На даху" || mainInput === "Одинички";
+}
+
+function IsArticleValid() {
+    const articleInput = document.getElementById('input-article');
+    if (articleInput.value.trim() === "") {
+        SetFieldError(articleInput);
+        articleInput.placeholder = "Це поле є обов'язковим!";
+        return false;
+    }
+    ClearFieldError(articleInput);
+    articleInput.placeholder = "Введіть назву артикула";
+    ClearFieldError(document.getElementById('main-selection'));
+    return true;
 }
 
 function IsArticleAndSelectionValid() {
-    if (document.getElementById('input-article').value.trim() === "") {
-        document.getElementById('input-article').style.border = "3px solid red";
-        document.getElementById('input-article').placeholder = "Це поле є обов'язковим!";
+    const articleInput = document.getElementById('input-article');
+    const mainSelection = document.getElementById('main-selection');
+    const boxSelection = document.getElementById('box-selection');
+    const rackSelection = document.getElementById('rack-selection');
+    const floorSelection = document.getElementById('floor-selection');
+    const mainInput = mainSelection.value;
+
+    ClearFieldError(articleInput);
+    ClearFieldError(mainSelection);
+    ClearFieldError(boxSelection);
+    ClearFieldError(rackSelection);
+    ClearFieldError(floorSelection);
+    articleInput.placeholder = "Введіть назву артикула";
+
+    if (articleInput.value.trim() === "") {
+        SetFieldError(articleInput);
+        articleInput.placeholder = "Це поле є обов'язковим!";
         return false;
-    } else if (document.getElementById('main-selection').value === "none") {
-        document.getElementById('input-article').style.border = "";
-        document.getElementById('input-article').placeholder = "Введіть назву артикула";
-        document.getElementById('main-selection').style.border = "3px solid red";
-        return false;
-    } else {
-        document.getElementById('input-article').style.border = "";
-        document.getElementById('input-article').placeholder = "Введіть назву артикула";
-        document.getElementById('main-selection').style.border = "";
-        return true;
     }
+
+    if (mainInput === "none") {
+        SetFieldError(mainSelection);
+        return false;
+    }
+
+    if ((mainInput === "Ящик праворуч" || mainInput === "Ящик ліворуч") && boxSelection.value === "none") {
+        SetFieldError(boxSelection);
+        return false;
+    }
+
+    if (mainInput === "Стелаж праворуч" || mainInput === "Стелаж ліворуч") {
+        const allowedSections = mainInput === "Стелаж праворуч"
+            ? ["1 секція", "2 секція", "3 секція"]
+            : ["1 секція", "2 секція"];
+        if (!allowedSections.includes(rackSelection.value)) {
+            SetFieldError(rackSelection);
+            return false;
+        }
+        if (floorSelection.value === "none") {
+            SetFieldError(floorSelection);
+            return false;
+        }
+    }
+
+    return IsLocationRuleValid(mainInput);
 }
 
 function ClearInput() {
@@ -169,31 +281,48 @@ function ClearInput() {
 }
 
 function MainListener() {
-    var choice = document.getElementById('main-selection').value;
-    if (choice === 'Ящик праворуч' || choice === 'Ящик ліворуч') {
-        document.getElementById('box-selection').classList.remove('hiden');
-        document.getElementById('rack-selection').classList.add('hiden');
-        document.getElementById('floor-selection').classList.add('hiden');
-    } else if (choice === 'Стелаж праворуч') { 
-        document.getElementById('floor-selection').classList.remove('hiden');
-        document.getElementById('rack-selection').classList.remove('hiden');
-        document.getElementById('specifical-rack').classList.remove('hiden');
-        document.getElementById('box-selection').classList.add('hiden');
-    } else if (choice === 'Стелаж ліворуч') {
-        document.getElementById('floor-selection').classList.remove('hiden');
-        document.getElementById('rack-selection').classList.remove('hiden');
-        document.getElementById('specifical-rack').classList.add('hiden');
-        document.getElementById('box-selection').classList.add('hiden');
-    } else {
-        document.getElementById('floor-selection').classList.add('hiden');
-        document.getElementById('box-selection').classList.add('hiden');
-        document.getElementById('rack-selection').classList.add('hiden');
+    const choice = document.getElementById('main-selection').value;
+    const boxSelection = document.getElementById('box-selection');
+    const rackSelection = document.getElementById('rack-selection');
+    const floorSelection = document.getElementById('floor-selection');
+
+    ClearFieldError(document.getElementById('main-selection'));
+    ClearFieldError(boxSelection);
+    ClearFieldError(rackSelection);
+    ClearFieldError(floorSelection);
+    HideLocationSubmenus();
+
+    if (choice === "Ящик праворуч" || choice === "Ящик ліворуч") {
+        boxSelection.classList.remove('hiden');
+        rackSelection.value = "none";
+        floorSelection.value = "none";
+        return;
     }
+
+    if (choice === "Стелаж праворуч" || choice === "Стелаж ліворуч") {
+        const maxSections = choice === "Стелаж праворуч" ? 3 : 2;
+        SetRackSectionLimit(maxSections);
+        rackSelection.classList.remove('hiden');
+        floorSelection.classList.remove('hiden');
+        boxSelection.value = "none";
+        return;
+    }
+
+    boxSelection.value = "none";
+    rackSelection.value = "none";
+    floorSelection.value = "none";
 }
 
 document.getElementById('main-selection').addEventListener('change', MainListener);
-
-
+document.getElementById('box-selection').addEventListener('change', () => {
+    ClearFieldError(document.getElementById('box-selection'));
+});
+document.getElementById('rack-selection').addEventListener('change', () => {
+    ClearFieldError(document.getElementById('rack-selection'));
+});
+document.getElementById('floor-selection').addEventListener('change', () => {
+    ClearFieldError(document.getElementById('floor-selection'));
+});
 
 function GetCameraErrorMessage(error) {
     const name = error && error.name ? error.name : "";
@@ -223,34 +352,27 @@ function GetCameraErrorMessage(error) {
 function SetCameraStatus(text, type) {
     const statusEl = document.getElementById('camera-status');
     const hintEl = document.getElementById('camera-hint');
-    if (!statusEl) {
-        return;
-    }
+    if (!statusEl) return;
 
     statusEl.classList.remove('camera-status-error', 'camera-status-ok', 'camera-status-busy');
     if (!text) {
         statusEl.textContent = "";
         statusEl.classList.add('hiden');
-        if (hintEl) {
-            hintEl.classList.remove('hiden');
-        }
+        if (hintEl) hintEl.classList.remove('hiden');
         return;
     }
 
     statusEl.textContent = text;
     statusEl.classList.remove('hiden');
-    if (type) {
-        statusEl.classList.add(`camera-status-${type}`);
-    }
-    if (hintEl && type !== "busy") {
-        hintEl.classList.add('hiden');
-    }
+    if (type) statusEl.classList.add(`camera-status-${type}`);
+    if (hintEl && type !== "busy") hintEl.classList.add('hiden');
 }
 
 function SetCameraUiState(state) {
     const captureBtn = document.getElementById('capture-btn');
     const retryBtn = document.getElementById('retry-scan-btn');
     const cancelBtn = document.getElementById('cancel-camera-btn');
+    const uploadBtn = document.getElementById('camera-upload-btn');
     const hintEl = document.getElementById('camera-hint');
     const controlsEl = document.querySelector('.camera-controls');
     const overlayEl = document.querySelector('.camera-overlay');
@@ -262,6 +384,15 @@ function SetCameraUiState(state) {
             captureBtn.classList.add('hiden');
         } else {
             captureBtn.classList.remove('hiden');
+        }
+    }
+
+    if (uploadBtn) {
+        uploadBtn.disabled = state === "processing";
+        if (state === "processing") {
+            uploadBtn.classList.add('hiden');
+        } else {
+            uploadBtn.classList.remove('hiden');
         }
     }
 
@@ -315,9 +446,7 @@ function ClearFrozenPreview() {
     if (freeze) {
         freeze.classList.add('hiden');
         const ctx = freeze.getContext("2d");
-        if (ctx) {
-            ctx.clearRect(0, 0, freeze.width, freeze.height);
-        }
+        if (ctx) ctx.clearRect(0, 0, freeze.width, freeze.height);
     }
     if (video) {
         video.classList.remove('hiden');
@@ -329,9 +458,7 @@ function ClearFrozenPreview() {
 
 function FreezeCapturedPreview(video) {
     const freeze = document.getElementById('camera-freeze');
-    if (!freeze || !video.videoWidth || !video.videoHeight) {
-        return;
-    }
+    if (!freeze || !video.videoWidth || !video.videoHeight) return;
 
     freeze.width = video.videoWidth;
     freeze.height = video.videoHeight;
@@ -349,20 +476,21 @@ function StopCameraTracks() {
     }
 
     const video = document.getElementById('camera-video');
-    if (video) {
-        video.srcObject = null;
-    }
+    if (video) video.srcObject = null;
 }
 
 function ResetCameraUi() {
     isScanRequestInFlight = false;
     SetCameraStatus("", null);
     SetCameraUiState("ready");
+    const processingText = document.querySelector('.camera-processing-text');
+    if (processingText) {
+        processingText.innerHTML = "Рахунок зафіксовано.<br>Розпізнавання всіх артикулів...";
+    }
 }
 
 async function StartTextScanner() {
     const cameraContainer = document.getElementById('camera-container');
-    const scanBtn = document.getElementById('scan-btn');
     const textAnswer = document.getElementById('text-answer');
     const video = document.getElementById('camera-video');
 
@@ -408,7 +536,7 @@ async function StartTextScanner() {
 
         cameraContainer.classList.remove('hiden');
         document.body.classList.add('camera-open');
-        scanBtn.classList.add('hiden');
+        HideScanActions();
         SetCameraUiState("ready");
         SetCameraStatus("", null);
     } catch (error) {
@@ -419,15 +547,11 @@ async function StartTextScanner() {
 function GetScanFrameCrop(video, frameEl) {
     const videoWidth = video.videoWidth;
     const videoHeight = video.videoHeight;
-    if (!videoWidth || !videoHeight) {
-        return null;
-    }
+    if (!videoWidth || !videoHeight) return null;
 
     const videoRect = video.getBoundingClientRect();
     const frameRect = frameEl.getBoundingClientRect();
-    if (videoRect.width <= 0 || videoRect.height <= 0) {
-        return null;
-    }
+    if (videoRect.width <= 0 || videoRect.height <= 0) return null;
 
     const scale = Math.max(videoRect.width / videoWidth, videoRect.height / videoHeight);
     const renderedWidth = videoWidth * scale;
@@ -495,22 +619,16 @@ function CaptureCroppedFrameBlob(video, crop) {
 
 function LooksLikePrice(value) {
     const token = String(value || "").trim().replace(/\u00A0/g, " ");
-    if (/(грн|uah|usd|eur|pln|zł|₴|\$|€)/i.test(token)) {
-        return true;
-    }
+    if (/(грн|uah|usd|eur|pln|zł|₴|\$|€)/i.test(token)) return true;
     const compact = token.replace(/\s+/g, "");
     return /^(?:\d{1,3}(?:\d{3})+|\d+)(?:[.,]\d{2})$/.test(compact);
 }
 
 function NormalizeRecognizedArticle(rawArticle) {
-    if (rawArticle === null || rawArticle === undefined) {
-        return null;
-    }
+    if (rawArticle === null || rawArticle === undefined) return null;
 
     const original = String(rawArticle).trim();
-    if (!original || LooksLikePrice(original)) {
-        return null;
-    }
+    if (!original || LooksLikePrice(original)) return null;
 
     let cleaned = original.toUpperCase();
     const charMap = {
@@ -522,33 +640,22 @@ function NormalizeRecognizedArticle(rawArticle) {
     cleaned = cleaned.replace(/\s+/g, "");
     cleaned = cleaned.replace(/[^A-ZА-ЯІЇЄҐ0-9+\-/.#*_]/g, "");
 
-    if (!cleaned || LooksLikePrice(cleaned)) {
-        return null;
-    }
-
-    if (cleaned.length < 2 || cleaned.length > 40) {
-        return null;
-    }
+    if (!cleaned || LooksLikePrice(cleaned)) return null;
+    if (cleaned.length < 2 || cleaned.length > 40) return null;
 
     return cleaned;
 }
 
 function CollectRecognizedArticles(data) {
     const rawList = [];
-    if (Array.isArray(data && data.articles)) {
-        rawList.push(...data.articles);
-    }
-    if (data && data.article) {
-        rawList.push(data.article);
-    }
+    if (Array.isArray(data && data.articles)) rawList.push(...data.articles);
+    if (data && data.article) rawList.push(data.article);
 
     const seen = new Set();
     const articles = [];
     rawList.forEach((item) => {
         const article = NormalizeRecognizedArticle(item);
-        if (!article || seen.has(article)) {
-            return;
-        }
+        if (!article || seen.has(article)) return;
         seen.add(article);
         articles.push(article);
     });
@@ -592,27 +699,17 @@ function ValidateGeminiScanResult(data) {
 }
 
 function GetGeminiHttpErrorMessage(status) {
-    if (status === 400) {
-        return "Некоректний запит до Gemini. Спробуйте зробити нове фото.";
-    }
-    if (status === 401) {
-        return "Неправильний API key Gemini. Перевірте ключ на backend.";
-    }
-    if (status === 403) {
-        return "Доступ до Gemini API заборонено.";
-    }
-    if (status === 429) {
-        return "Забагато запитів до Gemini. Зачекайте і спробуйте ще раз.";
-    }
-    if (status >= 500) {
-        return "Gemini API тимчасово недоступний. Спробуйте пізніше.";
-    }
+    if (status === 400) return "Некоректний запит до Gemini. Спробуйте зробити нове фото.";
+    if (status === 401) return "Неправильний API key Gemini. Перевірте ключ на backend.";
+    if (status === 403) return "Доступ до Gemini API заборонено.";
+    if (status === 429) return "Забагато запитів до Gemini. Зачекайте і спробуйте ще раз.";
+    if (status >= 500) return "Gemini API тимчасово недоступний. Спробуйте пізніше.";
     return "Помилка Gemini API. Спробуйте ще раз.";
 }
 
 async function SendFrameToGemini(blob) {
     const formData = new FormData();
-    formData.append("file", blob, "scan.jpg");
+    formData.append("file", blob, blob.name || "scan.jpg");
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), GEMINI_REQUEST_TIMEOUT_MS);
@@ -661,9 +758,7 @@ async function SendFrameToGemini(blob) {
 
 function ShowScanRetry(message) {
     const processingEl = document.getElementById('camera-processing');
-    if (processingEl) {
-        processingEl.classList.add('hiden');
-    }
+    if (processingEl) processingEl.classList.add('hiden');
     SetCameraStatus(message, "error");
     SetCameraUiState("retry");
     isScanRequestInFlight = false;
@@ -674,9 +769,7 @@ async function CaptureAndScanFrame() {
     const frameEl = document.getElementById('scanner-frame');
     const captureBtn = document.getElementById('capture-btn');
 
-    if (isScanRequestInFlight) {
-        return;
-    }
+    if (isScanRequestInFlight) return;
 
     if (!video || !video.srcObject || !video.videoWidth || !video.videoHeight) {
         alert("Камера ще не готова!");
@@ -690,9 +783,7 @@ async function CaptureAndScanFrame() {
     }
 
     isScanRequestInFlight = true;
-    if (captureBtn) {
-        captureBtn.disabled = true;
-    }
+    if (captureBtn) captureBtn.disabled = true;
 
     try {
         const blob = await CaptureCroppedFrameBlob(video, crop);
@@ -712,7 +803,7 @@ async function CaptureAndScanFrame() {
 
         SetCameraStatus(`Розпізнано артикулів: ${validated.articles.length}`, "ok");
         document.getElementById('input-article').value = validated.articles.join(", ");
-        document.getElementById('input-article').style.border = "";
+        ClearFieldError(document.getElementById('input-article'));
 
         if (validated.message) {
             const textAnswer = document.getElementById('text-answer');
@@ -727,33 +818,7 @@ async function CaptureAndScanFrame() {
         StopScanner();
     } catch (error) {
         console.error("Scan / Gemini error:", error);
-
-        if (error.status === 401 || error.status === 403) {
-            ShowScanRetry(GetGeminiHttpErrorMessage(error.status));
-            return;
-        }
-        if (error.status === 429) {
-            ShowScanRetry(GetGeminiHttpErrorMessage(429));
-            return;
-        }
-        if (error.status === 400) {
-            ShowScanRetry(GetGeminiHttpErrorMessage(400));
-            return;
-        }
-        if (error.status >= 500) {
-            ShowScanRetry(GetGeminiHttpErrorMessage(error.status));
-            return;
-        }
-        if (error.status === 408 || error.name === "AbortError") {
-            ShowScanRetry("Час очікування Gemini вичерпано. Спробуйте ще раз.");
-            return;
-        }
-        if (error.message && /Failed to fetch|NetworkError|Load failed/i.test(error.message)) {
-            ShowScanRetry("Backend недоступний. Перевірте з'єднання з сервером.");
-            return;
-        }
-
-        ShowScanRetry(error.message || "Артикул не вдалося розпізнати.");
+        ShowScanRetry(GetScanErrorMessage(error));
     }
 }
 
@@ -768,35 +833,150 @@ function StopScanner() {
     ClearFrozenPreview();
 
     const cameraContainer = document.getElementById('camera-container');
-    const scanBtn = document.getElementById('scan-btn');
-
-    if (cameraContainer) {
-        cameraContainer.classList.add('hiden');
-    }
+    if (cameraContainer) cameraContainer.classList.add('hiden');
     document.body.classList.remove('camera-open');
     ResetCameraUi();
 
-    if (scanBtn && document.getElementById('text-to-change').innerText === "Пошук артикула") {
-        scanBtn.classList.remove('hiden');
+    if (IsFindScreenActive()) {
+        ShowScanActions();
     }
 }
+
+function IsFindScreenActive() {
+    const actionScreen = document.getElementById('action-screen');
+    const title = document.getElementById('text-to-change');
+    return Boolean(
+        actionScreen &&
+        title &&
+        !actionScreen.classList.contains('hiden') &&
+        title.innerText === "Пошук артикула"
+    );
+}
+
+function TriggerScreenshotPicker() {
+    const input = document.getElementById('screenshot-input');
+    if (!input) return;
+    input.value = "";
+    input.click();
+}
+
+async function HandleScreenshotSelected(event) {
+    const file = event.target.files && event.target.files[0];
+    event.target.value = "";
+    if (!file) return;
+    if (!file.type || !file.type.startsWith("image/")) {
+        alert("Оберіть зображення скриншота рахунка.");
+        return;
+    }
+    await ScanUploadedScreenshot(file);
+}
+
+async function ScanUploadedScreenshot(file) {
+    if (isScanRequestInFlight) return;
+
+    isScanRequestInFlight = true;
+    const cameraWasOpen = document.body.classList.contains('camera-open');
+
+    try {
+        if (cameraWasOpen) {
+            StopCameraTracks();
+            ClearFrozenPreview();
+            SetCameraUiState("processing");
+            SetCameraStatus("", null);
+            const processingText = document.querySelector('.camera-processing-text');
+            if (processingText) {
+                processingText.innerHTML = "Скриншот завантажено.<br>Розпізнавання всіх артикулів...";
+            }
+        } else {
+            HideLoader();
+            document.getElementById('text-answer').classList.add('hiden');
+            HideScanActions();
+            ShowLoader("Обробка скриншота...");
+        }
+
+        const geminiResult = await SendFrameToGemini(file);
+        const validated = ValidateGeminiScanResult(geminiResult);
+
+        if (!validated.ok) {
+            console.error("Gemini validation failed:", validated, geminiResult);
+            if (cameraWasOpen) {
+                const processingText = document.querySelector('.camera-processing-text');
+                if (processingText) {
+                    processingText.innerHTML = "Рахунок зафіксовано.<br>Розпізнавання всіх артикулів...";
+                }
+                ShowScanRetry(validated.message);
+                return;
+            }
+            HideLoader();
+            isScanRequestInFlight = false;
+            ShowScanActions();
+            document.getElementById('text-answer').classList.remove('hiden');
+            document.getElementById('text-answer').innerHTML = validated.message;
+            return;
+        }
+
+        document.getElementById('input-article').value = validated.articles.join(", ");
+        ClearFieldError(document.getElementById('input-article'));
+
+        if (validated.message) {
+            HideLoader();
+            const textAnswer = document.getElementById('text-answer');
+            textAnswer.classList.remove('hiden');
+            textAnswer.innerHTML = validated.message;
+            isScanRequestInFlight = false;
+            StopScanner();
+            return;
+        }
+
+        ShowLoader("Перевірка в базі...");
+        await CheckArticlesOnBackend(validated.articles);
+        isScanRequestInFlight = false;
+        StopScanner();
+    } catch (error) {
+        console.error("Screenshot / Gemini error:", error);
+        const message = GetScanErrorMessage(error);
+        if (cameraWasOpen) {
+            const processingText = document.querySelector('.camera-processing-text');
+            if (processingText) {
+                processingText.innerHTML = "Рахунок зафіксовано.<br>Розпізнавання всіх артикулів...";
+            }
+            ShowScanRetry(message);
+            return;
+        }
+        HideLoader();
+        isScanRequestInFlight = false;
+        ShowScanActions();
+        document.getElementById('text-answer').classList.remove('hiden');
+        document.getElementById('text-answer').innerHTML = message;
+    }
+}
+
+function GetScanErrorMessage(error) {
+    if (error.status === 401 || error.status === 403) return GetGeminiHttpErrorMessage(error.status);
+    if (error.status === 429) return GetGeminiHttpErrorMessage(429);
+    if (error.status === 400) return GetGeminiHttpErrorMessage(400);
+    if (error.status >= 500) return GetGeminiHttpErrorMessage(error.status);
+    if (error.status === 408 || error.name === "AbortError") {
+        return "Час очікування Gemini вичерпано. Спробуйте ще раз.";
+    }
+    if (error.message && /Failed to fetch|NetworkError|Load failed/i.test(error.message)) {
+        return "Backend недоступний. Перевірте з'єднання з сервером.";
+    }
+    return error.message || "Артикул не вдалося розпізнати.";
+}
+
+document.getElementById('screenshot-input').addEventListener('change', HandleScreenshotSelected);
 
 function ShowLoader(text) {
     const loaderContainer = document.getElementById('loader-container');
     const loaderStatus = document.getElementById('loader-status');
-    if (loaderContainer) {
-        loaderContainer.classList.remove('hiden');
-    }
-    if (loaderStatus && text) {
-        loaderStatus.innerText = text;
-    }
+    if (loaderContainer) loaderContainer.classList.remove('hiden');
+    if (loaderStatus && text) loaderStatus.innerText = text;
 }
 
 function HideLoader() {
     const loaderContainer = document.getElementById('loader-container');
-    if (loaderContainer) {
-        loaderContainer.classList.add('hiden');
-    }
+    if (loaderContainer) loaderContainer.classList.add('hiden');
 }
 
 async function CheckArticlesOnBackend(articles) {
