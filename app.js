@@ -2,7 +2,7 @@ let videoStream = null;
 let isScanRequestInFlight = false;
 
 // Оновлено URL з ngrok на Render
-const BACKEND_URL = "https://backend-d9r1.onrender.com";
+const BACKEND_URL = "https://backend-d9rl.onrender.com";
 
 const GEMINI_SCAN_ENDPOINT = `${BACKEND_URL}/gemini/scan`;
 const MIN_CONFIDENCE = 0.55;
